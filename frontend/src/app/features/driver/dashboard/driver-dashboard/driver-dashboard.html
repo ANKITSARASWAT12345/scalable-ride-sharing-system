@@ -1,0 +1,125 @@
+<div class="dashboard">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">RideX Driver</div>
+    <div class="user">
+      <span>{{ user?.name }}</span>
+      <button (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- ONLINE TOGGLE -->
+  <div class="status-bar">
+    <span>Status:</span>
+    <button 
+      class="toggle-btn"
+      [class.online]="isOnline"
+      (click)="toggleOnline()"
+      [disabled]="isTogglingStatus"
+    >
+      {{ isOnline ? '🟢 Online' : '⚪ Offline' }}
+    </button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button 
+      [class.active]="view === 'rides'" 
+      (click)="view = 'rides'"
+    >
+      Available Rides
+    </button>
+    <button 
+      [class.active]="view === 'history'" 
+      (click)="view = 'history'"
+    >
+      Trip History
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="errorMessage" class="error-box">
+    {{ errorMessage }}
+  </div>
+
+  <!-- RIDES VIEW -->
+  <div *ngIf="view === 'rides'" class="rides-section">
+
+    <!-- ACTIVE RIDE (SAFE) -->
+    <div *ngIf="activeRide as ride; else availableBlock" class="active-ride">
+      <h3>Current Ride</h3>
+
+      <div class="ride-info">
+        <p><strong>Pickup:</strong> {{ ride.pickupAddress }}</p>
+        <p><strong>Drop:</strong> {{ ride.dropAddress }}</p>
+      </div>
+
+      <div class="status">
+        Status: {{ ride.status }}
+      </div>
+
+      <div class="actions">
+        <button 
+          *ngIf="nextStatus()" 
+          (click)="updateStatus(nextStatus())"
+        >
+          {{ nextStatusLabel() }}
+        </button>
+      </div>
+    </div>
+
+    <!-- AVAILABLE RIDES BLOCK -->
+    <ng-template #availableBlock>
+
+      <h3 *ngIf="isOnline">Nearby Ride Requests</h3>
+
+      <p *ngIf="!isOnline" class="offline-msg">
+        🚫 Go online to receive ride requests
+      </p>
+
+      <!-- LIST -->
+      <div *ngIf="isOnline && availableRides.length > 0; else emptyState">
+        <div *ngFor="let ride of availableRides" class="ride-card">
+          <p><strong>{{ ride.pickupAddress }}</strong></p>
+          <p>→ {{ ride.dropAddress }}</p>
+
+          <button (click)="acceptRide(ride.id)">
+            Accept Ride
+          </button>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <ng-template #emptyState>
+        <div class="empty">
+          🚗 No rides available right now
+        </div>
+      </ng-template>
+
+    </ng-template>
+
+  </div>
+
+  <!-- HISTORY VIEW -->
+  <div *ngIf="view === 'history'" class="history-section">
+
+    <h3>Your Trips</h3>
+
+    <div *ngIf="tripHistory.length > 0; else noHistory">
+      <div *ngFor="let ride of tripHistory" class="ride-card">
+        <p><strong>{{ ride.pickupAddress }}</strong> → {{ ride.dropAddress }}</p>
+        <span class="status">{{ ride.status }}</span>
+      </div>
+    </div>
+
+    <!-- EMPTY HISTORY -->
+    <ng-template #noHistory>
+      <div class="empty">
+        📭 No trips yet
+      </div>
+    </ng-template>
+
+  </div>
+
+</div>
