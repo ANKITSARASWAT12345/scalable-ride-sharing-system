@@ -1,0 +1,43 @@
+# application.yml
+# This file is the brain of your app's configuration.
+# Spring Boot reads this on startup.
+
+server:
+  port: 8080                          # Your backend runs on localhost:8080
+
+spring:
+  application:
+    name: rideapp-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rideapp   # PostgreSQL connection URL
+    username: postgres                               # your PostgreSQL username
+    password: Ankit@194767                    # the password you set during install
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update        # auto-creates/updates tables from your @Entity classes
+        # use 'create' to drop and recreate on every restart (dev only)
+      # use 'validate' in production ? never auto-modify prod DB
+    show-sql: true            # prints every SQL query in console ? great for learning
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true      # makes printed SQL readable with indentation
+
+  jackson:
+    default-property-inclusion: non_null   # don't include null fields in JSON responses
+
+# JWT configuration ? we reference these in our Java code
+app:
+  jwt:
+    secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+    # ^ This is a 256-bit hex secret key. In production, store this in environment variables, NEVER in code.
+    expiration: 86400000      # 24 hours in milliseconds (1000ms × 60s × 60min × 24hr)
+    refresh-expiration: 604800000  # 7 days in milliseconds
+
+logging:
+  level:
+    com.rideapp: DEBUG        # shows your app's own log messages
+    org.springframework.security: DEBUG   # shows security decisions ? helpful while building
