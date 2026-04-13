@@ -43,7 +43,7 @@ public class RideService {
         );
 
         rideRepository.findByDriverAndStatusIn(rider,activeStatus).ifPresent(r->{
-            throw  new IllegalStateException("You already have an active ride");
+            throw  new IllegalStateException("You already have an active ridee");
         });
 
 
