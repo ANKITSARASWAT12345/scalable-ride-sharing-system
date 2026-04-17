@@ -44,4 +44,23 @@ public interface DriverLocationRepository extends JpaRepository<DriverLocation, 
             @Param("radiusKm") Double radiusKm,
             @Param("vehicleType") String vehicleType
     );
+
+
+    // Add to DriverLocationRepository.java
+    @Query(value = """
+    SELECT COUNT(*) FROM driver_locations dl
+    WHERE dl.is_available = true
+    AND (6371 * acos(
+        cos(radians(:lat)) * cos(radians(dl.latitude))
+        * cos(radians(dl.longitude) - radians(:lng))
+        + sin(radians(:lat)) * sin(radians(dl.latitude))
+    )) <= :radiusKm
+    """, nativeQuery = true)
+    long countNearbyAvailableDrivers(
+            @Param("lat") Double lat,
+            @Param("lng") Double lng,
+            @Param("radiusKm") Double radiusKm
+    );
+
+
 }

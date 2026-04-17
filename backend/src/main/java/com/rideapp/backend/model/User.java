@@ -95,6 +95,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return isActive; }
 
+    @OneToMany(mappedBy = "driver" ,fetch=FetchType.LAZY)
+    private  DriverProfile driverProfile;
+
+
 
 
 

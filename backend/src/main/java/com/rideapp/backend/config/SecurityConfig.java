@@ -46,6 +46,10 @@ public class SecurityConfig {
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 // only ADMIN role can access admin endpoints
 
+                                .requestMatchers("/ws/**").permitAll()
+                                // WebSocket handshake happens over HTTP first — must be public
+                                // Authentication is handled separately inside the WebSocket connection itself
+
                                 .anyRequest().authenticated()
                         // everything else requires a valid JWT token
                 )
