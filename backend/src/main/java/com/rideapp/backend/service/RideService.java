@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,68 +32,170 @@ public class RideService {
     private final DriverLocationRepository driverLocationRepository;
     private final FareCalculatorService fareCalculatorService;
 
+    private final DriverMatchingService driverMatchingService;
+    private final SurgePricingService surgePricingService;
+    private final EtaService etaService;
+    private final RealTimeService realTimeService;
+
+
+
+//    @Transactional
+//    public RideResponse bookRide(BookRideRequest request,String riderEmail){
+//
+//        User rider= getUserByEmail(riderEmail);
+//
+//
+//        List<RideStatus> activeStatus= List.of(
+//                RideStatus.REQUESTED,RideStatus.IN_PROGRESS,RideStatus.ACCEPTED,RideStatus.PICKED_UP
+//        );
+//
+//        rideRepository.findByDriverAndStatusIn(rider,activeStatus).ifPresent(r->{
+//            throw  new IllegalStateException("You already have an active ridee");
+//        });
+//
+//
+//        BigDecimal distance= fareCalculatorService.calculateDistance(
+//
+//                request.getPickupLat(),request.getPickupLng(),
+//                request.getDropLat(),request.getDropLng()
+//        );
+//
+//        BigDecimal estimateFare=fareCalculatorService.calculate(request.getVehicleType(),distance);
+//
+//        List<DriverLocation> nearByDrivers=driverLocationRepository.findNearbyAvailableDrivers(
+//                request.getPickupLat(),request.getPickupLng(),
+//                5.0,
+//                request.getVehicleType().name()
+//        );
+//
+//        User assignedDriver=nearByDrivers.isEmpty()?null:nearByDrivers.get(0).getDriver();
+//
+//        Ride ride=Ride.builder()
+//                .rider(rider)
+//                .driver(assignedDriver)
+//                .pickupAddress(request.getPickupAddress())
+//                .pickupLat(request.getPickupLat())
+//                .pickupLng(request.getPickupLng())
+//                .dropLat(request.getDropLat())
+//                .dropLng(request.getDropLng())
+//                .vehicleType(request.getVehicleType())
+//                .distanceKm(distance)
+//                .fare(estimateFare)
+//                .status(assignedDriver != null ? RideStatus.ACCEPTED : RideStatus.REQUESTED)
+//                .acceptedAt(assignedDriver != null ? LocalDateTime.now() : null)
+//                .build();
+//
+//        //if driver is assigned to this ride then make the driver as unavailable
+//
+//
+//        if(assignedDriver!=null){
+//            driverLocationRepository.findByDriver(assignedDriver).ifPresent(loc->{
+//                loc.setAvailable(false);
+//                driverLocationRepository.save(loc);
+//            });
+//        }
+//
+//        Ride saved=rideRepository.save(ride);
+//
+//        return toResponse(saved);
+//
+//
+//    }
+
 
     @Transactional
-    public RideResponse bookRide(BookRideRequest request,String riderEmail){
 
-        User rider= getUserByEmail(riderEmail);
+    public RideResponse bookRide(BookRideRequest request, String riderEmail){
 
+        User rider=getUserByEmail(riderEmail);
 
-        List<RideStatus> activeStatus= List.of(
-                RideStatus.REQUESTED,RideStatus.IN_PROGRESS,RideStatus.ACCEPTED,RideStatus.PICKED_UP
+        // block double-booking
+        List<RideStatus> activeStatuses = List.of(
+                RideStatus.REQUESTED, RideStatus.ACCEPTED,
+                RideStatus.PICKED_UP, RideStatus.IN_PROGRESS
         );
 
-        rideRepository.findByDriverAndStatusIn(rider,activeStatus).ifPresent(r->{
-            throw  new IllegalStateException("You already have an active ridee");
+        rideRepository.findByDriverAndStatusIn(rider,activeStatuses).ifPresent(r->{
+            throw new IllegalStateException("You already have an active ride");
         });
 
 
-        BigDecimal distance= fareCalculatorService.calculateDistance(
-
-                request.getPickupLat(),request.getPickupLng(),
-                request.getDropLat(),request.getDropLng()
+        // ── ALGORITHM 1: Smart driver matching ──
+        Optional<User> bestDriver= driverMatchingService.findBestDriver(
+                request.getPickupLat(), request.getPickupLng(), request.getVehicleType()
         );
 
-        BigDecimal estimateFare=fareCalculatorService.calculate(request.getVehicleType(),distance);
-
-        List<DriverLocation> nearByDrivers=driverLocationRepository.findNearbyAvailableDrivers(
-                request.getPickupLat(),request.getPickupLng(),
-                5.0,
-                request.getVehicleType().name()
+        // ── ALGORITHM 2: Surge pricing ──
+        BigDecimal surgeMultiplier = surgePricingService.getSurgeMultiplier(
+                request.getPickupLat(), request.getPickupLng()
         );
 
-        User assignedDriver=nearByDrivers.isEmpty()?null:nearByDrivers.get(0).getDriver();
 
-        Ride ride=Ride.builder()
+        // ── ALGORITHM 3: ETA calculation ──
+        int etaMinutes = 0;
+        if (bestDriver.isPresent()) {
+            driverLocationRepository.findByDriver(bestDriver.get()).ifPresent(loc -> {
+                // store ETA in a local variable for use in the response
+            });
+            // simplified: just calculate from driver's stored location
+            etaMinutes = bestDriver.map(driver ->
+                    driverLocationRepository.findByDriver(driver)
+                            .map(loc -> etaService.calculateEtaMinutes(
+                                    loc.getLatitude(), loc.getLongitude(),
+                                    request.getPickupLat(), request.getPickupLng(),
+                                    request.getVehicleType()
+                            )).orElse(5)
+            ).orElse(0);
+        }
+
+
+        // Calculate distance and base fare
+        BigDecimal distance = fareCalculatorService.calculateDistance(
+                request.getPickupLat(), request.getPickupLng(),
+                request.getDropLat(), request.getDropLng()
+        );
+        BigDecimal baseFare    = fareCalculatorService.calculate(request.getVehicleType(), distance);
+        BigDecimal surgedFare  = surgePricingService.applysurge(baseFare, surgeMultiplier);
+
+
+        // Build the ride
+        Ride ride = Ride.builder()
                 .rider(rider)
-                .driver(assignedDriver)
+                .driver(bestDriver.orElse(null))
                 .pickupAddress(request.getPickupAddress())
                 .pickupLat(request.getPickupLat())
                 .pickupLng(request.getPickupLng())
+                .dropAddress(request.getDropAddress())
                 .dropLat(request.getDropLat())
                 .dropLng(request.getDropLng())
                 .vehicleType(request.getVehicleType())
                 .distanceKm(distance)
-                .fare(estimateFare)
-                .status(assignedDriver != null ? RideStatus.ACCEPTED : RideStatus.REQUESTED)
-                .acceptedAt(assignedDriver != null ? LocalDateTime.now() : null)
+                .fare(surgedFare)
+                .surgeMultiplier(surgeMultiplier)    // add this field to Ride entity
+                .etaMinutes(etaMinutes)              // add this field to Ride entity
+                .status(bestDriver.isPresent() ? RideStatus.ACCEPTED : RideStatus.REQUESTED)
+                .acceptedAt(bestDriver.isPresent() ? LocalDateTime.now() : null)
                 .build();
+        // Mark driver as unavailable
+        bestDriver.ifPresent(driver ->
+                driverLocationRepository.findByDriver(driver).ifPresent(loc -> {
+                    loc.setAvailable(false);
+                    driverLocationRepository.save(loc);
+                })
+        );
 
-        //if driver is assigned to this ride then make the driver as unavailable
+        Ride saved = rideRepository.save(ride);
 
-
-        if(assignedDriver!=null){
-            driverLocationRepository.findByDriver(assignedDriver).ifPresent(loc->{
-                loc.setAvailable(false);
-                driverLocationRepository.save(loc);
-            });
-        }
-
-        Ride saved=rideRepository.save(ride);
+        // ── REAL-TIME: Notify driver they've been matched ──
+        bestDriver.ifPresent(driver ->
+                realTimeService.sendPrivateNotification(
+                        driver.getEmail(),
+                        "RIDE_ASSIGNED",
+                        toResponse(saved)
+                )
+        );
 
         return toResponse(saved);
-
-
     }
 
 

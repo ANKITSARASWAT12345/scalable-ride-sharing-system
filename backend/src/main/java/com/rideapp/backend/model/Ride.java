@@ -87,6 +87,12 @@ public class Ride {
     @Column(name = "cancellation_reason")
     private String cancellationReason;
 
+    @Column(name = "surge_multiplier", precision = 4, scale = 2)
+    private BigDecimal surgeMultiplier = BigDecimal.ONE;
+
+    @Column(name = "eta_minutes")
+    private Integer etaMinutes;
+
     @PrePersist
     protected  void Oncreate(){
         requestedAt= LocalDateTime.now();

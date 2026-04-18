@@ -32,4 +32,6 @@ public class RideResponse   {
     private LocalDateTime requestedAt;
     private LocalDateTime acceptedAt;
     private LocalDateTime completedAt;
+    private BigDecimal surgeMultiplier;
+    private Integer etaMinutes;
 }

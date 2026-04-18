@@ -34,7 +34,7 @@ app:
   jwt:
     secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
     # ^ This is a 256-bit hex secret key. In production, store this in environment variables, NEVER in code.
-    expiration: 86400000      # 24 hours in milliseconds (1000ms × 60s × 60min × 24hr)
+    expiration: 86400000      # 24 hours in milliseconds (1000ms ? 60s ? 60min ? 24hr)
     refresh-expiration: 604800000  # 7 days in milliseconds
 
 logging:
