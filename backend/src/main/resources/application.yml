@@ -9,6 +9,20 @@ spring:
   application:
     name: rideapp-backend
 
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password  # Gmail App Password (not your login password)
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
   datasource:
     url: jdbc:postgresql://localhost:5432/rideapp   # PostgreSQL connection URL
     username: postgres                               # your PostgreSQL username
@@ -37,7 +51,21 @@ app:
     expiration: 86400000      # 24 hours in milliseconds (1000ms ? 60s ? 60min ? 24hr)
     refresh-expiration: 604800000  # 7 days in milliseconds
 
+  platform:
+    commission-rate: 0.20   # 20% ? same as Rapido
+
+
 logging:
   level:
     com.rideapp: DEBUG        # shows your app's own log messages
     org.springframework.security: DEBUG   # shows security decisions ? helpful while building
+
+#Razorpay credentails
+
+razorpay:
+  key-id: rzp_test_YOUR_KEY_ID
+  key-secret: YOUR_KEY_SECRET
+
+
+
+
