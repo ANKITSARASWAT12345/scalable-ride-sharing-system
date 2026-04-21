@@ -2,18 +2,15 @@ package com.rideapp.backend.model;
 
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@RequiredArgsConstructor
 @Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name="wallets")

@@ -10,7 +10,6 @@ import java.util.UUID;
 @Data
 @Builder
 @NoArgsConstructor
-@RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name="ratings",

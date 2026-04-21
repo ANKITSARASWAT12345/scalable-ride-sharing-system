@@ -2,18 +2,15 @@ package com.rideapp.backend.model;
 
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@RequiredArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 @Table(name="payments")
@@ -27,7 +24,7 @@ public class Payment {
 
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="rider_id",unique = true, nullable = false)
+    @JoinColumn(name="rid_id",unique = true, nullable = false)
     private Ride ride;
 
     @ManyToOne(fetch = FetchType.LAZY)

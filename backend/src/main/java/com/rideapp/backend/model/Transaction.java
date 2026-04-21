@@ -28,6 +28,10 @@ public class Transaction {
     @JoinColumn(name="wallet_id", nullable = false)
     private Wallet wallet;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ride_id")
+    private Ride ride;
+
 
     // DEBIT, CREDIT, REFUND, TOPUP
     @Enumerated(EnumType.STRING)

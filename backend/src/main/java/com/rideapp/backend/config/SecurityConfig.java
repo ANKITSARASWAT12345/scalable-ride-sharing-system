@@ -1,6 +1,7 @@
 package com.rideapp.backend.config;
 
 
+import com.rideapp.backend.security.JwtAuthenticationEntryPoint;
 import com.rideapp.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
@@ -50,6 +52,11 @@ public class SecurityConfig {
                                 // WebSocket handshake happens over HTTP first — must be public
                                 // Authentication is handled separately inside the WebSocket connection itself
 
+                                // Add to the authorizeHttpRequests block in SecurityConfig.java
+                                .requestMatchers("/api/payments/webhook").permitAll()
+                                // Webhook comes from Razorpay's servers — no user JWT, verified by signature instead
+
+
                                 .anyRequest().authenticated()
                         // everything else requires a valid JWT token
                 )
@@ -58,6 +65,9 @@ public class SecurityConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                         // STATELESS = no server-side sessions. Each request must carry its own JWT.
                         // This is how all modern REST APIs work — scalable and clean.
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
 
                 .authenticationProvider(authenticationProvider)
