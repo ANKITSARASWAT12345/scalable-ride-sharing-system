@@ -1,6 +1,5 @@
 package com.rideapp.backend.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,12 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(
@@ -34,10 +30,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(), Map.of(
-                "status", HttpStatus.UNAUTHORIZED.value(),
-                "error", message,
-                "timestamp", LocalDateTime.now().toString()
+        response.getWriter().write(String.format(
+                "{\"status\":%d,\"error\":\"%s\",\"timestamp\":\"%s\"}",
+                HttpStatus.UNAUTHORIZED.value(),
+                escapeJson(message),
+                LocalDateTime.now()
         ));
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

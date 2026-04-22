@@ -45,7 +45,7 @@ public class RealTimeService {
     }
 
     // 🚦 Ride status updates
-    public void broadcastRideStatusUpdate(UUID rideId, String status, Map<String, String> extraData) {
+    public void broadcastRideStatusUpdate(UUID rideId, String status, Map<String, Object> extraData) {
 
         if (rideId == null || status == null) {
             log.warn("Invalid ride status update. rideId={}, status={}", rideId, status);

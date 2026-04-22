@@ -16,10 +16,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -115,7 +119,7 @@ public class RideService {
                 RideStatus.PICKED_UP, RideStatus.IN_PROGRESS
         );
 
-        rideRepository.findByDriverAndStatusIn(rider,activeStatuses).ifPresent(r->{
+        rideRepository.findByRiderAndStatusIn(rider,activeStatuses).ifPresent(r->{
             throw new IllegalStateException("You already have an active ride");
         });
 
@@ -212,7 +216,7 @@ public class RideService {
         boolean isDriver=ride.getDriver()!=null && ride.getDriver().getId().equals(user.getId());
 
 
-        if(!isDriver && !isDriver){
+        if(!isRider && !isDriver){
             throw new UnauthorizedActionException("Not authorized to cancel this ride");
         }
 
@@ -238,8 +242,16 @@ public class RideService {
         ride.setCancelledAt(LocalDateTime.now());
         ride.setCancellationReason(reason);
 
+        Ride savedRide = rideRepository.save(ride);
+        RideResponse response = toResponse(savedRide);
 
-        return toResponse(rideRepository.save(ride));
+        Map<String, Object> statusMetadata = new HashMap<>();
+        statusMetadata.put("reason", reason);
+        statusMetadata.put("ride", response);
+
+        broadcastRideStatusAfterCommit(savedRide.getId(), savedRide.getStatus(), statusMetadata);
+
+        return response;
 
     }
 
@@ -270,9 +282,15 @@ public class RideService {
             loc.setAvailable(false);
             driverLocationRepository.save(loc);
         });
+        Ride savedRide = rideRepository.save(ride);
+        RideResponse response = toResponse(savedRide);
 
+        Map<String, Object> statusMetadata = new HashMap<>();
+        statusMetadata.put("ride", response);
 
-        return toResponse(rideRepository.save(ride));
+        broadcastRideStatusAfterCommit(savedRide.getId(), savedRide.getStatus(), statusMetadata);
+
+        return response;
     }
 
 
@@ -309,8 +327,15 @@ public class RideService {
             }
             default -> throw new IllegalStateException("Invalid transition: " + newStatus);
         }
+        Ride savedRide = rideRepository.save(ride);
+        RideResponse response = toResponse(savedRide);
 
-        return toResponse(rideRepository.save(ride));
+        Map<String, Object> statusMetadata = new HashMap<>();
+        statusMetadata.put("ride", response);
+
+        broadcastRideStatusAfterCommit(savedRide.getId(), savedRide.getStatus(), statusMetadata);
+
+        return response;
     }
 
 
@@ -349,6 +374,23 @@ public class RideService {
                     "Cannot transition from " + current + " to " + next
             );
         }
+    }
+
+    private void broadcastRideStatusAfterCommit(UUID rideId, RideStatus status, Map<String, Object> extraData) {
+        Runnable broadcastAction = () ->
+                realTimeService.broadcastRideStatusUpdate(rideId, status.name(), extraData);
+
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            broadcastAction.run();
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                broadcastAction.run();
+            }
+        });
     }
 
 

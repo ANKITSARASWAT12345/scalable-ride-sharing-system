@@ -19,7 +19,7 @@ public class WebSocketConfig  implements WebSocketMessageBrokerConfigurer {
 
 
         //message from server to client
-        registry.enableSimpleBroker("/topics","queue");
+        registry.enableSimpleBroker("/topic", "/queue");
 
         //message from client to server
         registry.setApplicationDestinationPrefixes("/app");
