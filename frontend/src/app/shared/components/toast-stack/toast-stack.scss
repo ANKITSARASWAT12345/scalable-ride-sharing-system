@@ -1,0 +1,72 @@
+.toast-stack {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.toast {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.toast.success {
+  border-color: rgba(22, 163, 74, 0.18);
+}
+
+.toast.info {
+  border-color: rgba(37, 99, 235, 0.18);
+}
+
+.toast.warning {
+  border-color: rgba(217, 119, 6, 0.18);
+}
+
+.toast.error {
+  border-color: rgba(220, 38, 38, 0.18);
+}
+
+.toast-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.toast-copy strong {
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.toast-copy p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.45;
+  font-size: 0.88rem;
+}
+
+.dismiss {
+  border: none;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 700;
+  align-self: flex-start;
+}
+
+@media (max-width: 640px) {
+  .toast-stack {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

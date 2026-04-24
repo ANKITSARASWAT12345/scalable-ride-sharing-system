@@ -1,0 +1,103 @@
+<div class="register-container">
+  <div class="register-card">
+
+    <!-- Branding -->
+    <div class="brand">
+      <h1>RideX</h1>
+      <p>Create your account</p>
+    </div>
+
+    <!-- Global Error -->
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <!-- Name -->
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" formControlName="name" placeholder="Enter your name" />
+        <small *ngIf="name.touched && name.invalid">
+          Name must be at least 2 characters
+        </small>
+        <small *ngIf="fieldErrors['name']">{{ fieldErrors['name'] }}</small>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="Enter your email" />
+        <small *ngIf="email.touched && email.invalid">
+          Valid email is required
+        </small>
+        <small *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</small>
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" formControlName="phone" placeholder="Enter phone number" />
+        <small *ngIf="phone.touched && phone.invalid">
+          Enter valid Indian number
+        </small>
+        <small *ngIf="fieldErrors['phone']">{{ fieldErrors['phone'] }}</small>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" formControlName="password" placeholder="Enter password" />
+        <small *ngIf="password.touched && password.invalid">
+          Minimum 8 characters required
+        </small>
+        <small *ngIf="fieldErrors['password']">{{ fieldErrors['password'] }}</small>
+      </div>
+
+      <!-- Role Selection -->
+      <div class="form-group">
+        <label>Register As</label>
+        <div class="role-toggle">
+          <button 
+            type="button"
+            [class.active]="role.value === 'RIDER'"
+            (click)="registerForm.patchValue({ role: 'RIDER' })"
+          >
+            Rider
+          </button>
+
+          <button 
+            type="button"
+            [class.active]="role.value === 'DRIVER'"
+            (click)="registerForm.patchValue({ role: 'DRIVER' })"
+          >
+            Driver
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" [disabled]="isLoading" class="register-btn">
+        <span *ngIf="!isLoading">Create Account</span>
+        <span *ngIf="isLoading" class="loader"></span>
+      </button>
+
+    </form>
+
+    <!-- Divider -->
+    <div class="divider"><span>OR</span></div>
+
+    <!-- Social -->
+    <div class="social-login">
+      <button>Continue with Google</button>
+      <button>Continue with Apple</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Already have an account? <a routerLink="/auth/login">Login</a></p>
+    </div>
+
+  </div>
+</div>

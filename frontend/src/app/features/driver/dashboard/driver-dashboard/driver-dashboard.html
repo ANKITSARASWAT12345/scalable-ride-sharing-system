@@ -1,0 +1,188 @@
+<div class="dashboard">
+  <header class="topbar">
+    <div class="logo-wrap">
+      <span class="logo-mark">RX</span>
+      <div>
+        <strong>RideX Driver</strong>
+        <p>Stay online, manage trips, and navigate live.</p>
+      </div>
+    </div>
+
+    <div class="profile-bar">
+      <span class="presence" [class.online]="isOnline">{{ isOnline ? 'Online' : 'Offline' }}</span>
+      <div class="driver-id">
+        <strong>{{ user?.name }}</strong>
+        <small>Driver account</small>
+      </div>
+      <button class="logout-btn" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="panel">
+      <section class="hero-card">
+        <span class="eyebrow">Driver workspace</span>
+        <h1>Keep your trip board and map in sync all shift long.</h1>
+        <p>Your last online state now stays active until you manually switch it off.</p>
+      </section>
+
+      <section class="status-card card">
+        <div>
+          <span class="mini-label">Availability</span>
+          <h3>{{ isOnline ? 'You are live for new trips' : 'Trip requests are paused' }}</h3>
+          <p>
+            {{ isOnline
+              ? 'Your online status stays remembered until you go offline.'
+              : 'Go online whenever you are ready to receive new ride requests.' }}
+          </p>
+        </div>
+
+        <button
+          class="toggle-btn"
+          [class.online]="isOnline"
+          (click)="toggleOnline()"
+          [disabled]="isTogglingStatus">
+          {{ isTogglingStatus ? 'Updating...' : (isOnline ? 'Go offline' : 'Go online') }}
+        </button>
+      </section>
+
+      <section class="stats-row">
+        <article class="stat-card">
+          <strong>{{ availableRides.length }}</strong>
+          <span>Open rides</span>
+        </article>
+        <article class="stat-card">
+          <strong>{{ completedTrips }}</strong>
+          <span>Completed</span>
+        </article>
+      </section>
+
+      <div class="tabs">
+        <button [class.active]="view === 'rides'" (click)="view = 'rides'">Trips</button>
+        <button [class.active]="view === 'history'" (click)="view = 'history'">History</button>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="view === 'rides'">
+        <div *ngIf="activeRide as ride; else availableBlock" class="card active-ride">
+          <div class="section-title">
+            <div>
+              <span class="mini-label">Current trip</span>
+              <h3>{{ ride.riderName }}</h3>
+            </div>
+            <span class="status-pill">{{ ride.status }}</span>
+          </div>
+
+          <div class="route">
+            <div class="dot pickup"></div>
+            <p>{{ ride.pickupAddress }}</p>
+          </div>
+
+          <div class="route">
+            <div class="dot drop"></div>
+            <p>{{ ride.dropAddress }}</p>
+          </div>
+
+          <div class="trip-meta">
+            <span *ngIf="ride.distanceKm">{{ ride.distanceKm | number:'1.0-1' }} km</span>
+            <span *ngIf="ride.fare">INR {{ ride.fare | number:'1.0-0' }}</span>
+            <span *ngIf="driverLocation">GPS live</span>
+          </div>
+
+          <button
+            *ngIf="nextStatus()"
+            class="primary"
+            (click)="updateStatus(nextStatus())">
+            {{ nextStatusLabel() }}
+          </button>
+        </div>
+
+        <ng-template #availableBlock>
+          <div *ngIf="!isOnline" class="empty">
+            Go online to start receiving ride requests.
+          </div>
+
+          <div *ngIf="isOnline && availableRides.length > 0; else emptyState">
+            <div *ngFor="let ride of availableRides" class="ride-card card">
+              <div class="ride-card-top">
+                <strong>{{ ride.riderName || 'New rider request' }}</strong>
+                <span class="status-pill">{{ ride.vehicleType }}</span>
+              </div>
+
+              <div class="route small">
+                <p><strong>{{ ride.pickupAddress }}</strong></p>
+                <p>{{ ride.dropAddress }}</p>
+              </div>
+
+              <div class="trip-meta">
+                <span *ngIf="ride.distanceKm">{{ ride.distanceKm | number:'1.0-1' }} km</span>
+                <span *ngIf="ride.fare">INR {{ ride.fare | number:'1.0-0' }}</span>
+              </div>
+
+              <button class="primary" (click)="acceptRide(ride.id)">
+                Accept ride
+              </button>
+            </div>
+          </div>
+
+          <ng-template #emptyState>
+            <div class="empty" *ngIf="isOnline">
+              No open trips right now. Stay online and new requests will appear here.
+            </div>
+          </ng-template>
+        </ng-template>
+      </div>
+
+      <div *ngIf="view === 'history'" class="history card">
+        <div class="section-title">
+          <div>
+            <span class="mini-label">History</span>
+            <h3>Your recent trips</h3>
+          </div>
+        </div>
+
+        <div *ngIf="tripHistory.length > 0; else noHistory">
+          <div *ngFor="let ride of tripHistory" class="ride-card history-item">
+            <div class="ride-card-top">
+              <strong>{{ ride.pickupAddress }}</strong>
+              <span class="status-pill">{{ ride.status }}</span>
+            </div>
+            <p>{{ ride.dropAddress }}</p>
+            <div class="trip-meta">
+              <span *ngIf="ride.completedAt">{{ ride.completedAt | date:'mediumDate' }}</span>
+              <span *ngIf="ride.fare">INR {{ ride.fare | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noHistory>
+          <div class="empty">No trips yet.</div>
+        </ng-template>
+      </div>
+    </aside>
+
+    <section class="map">
+      <app-ride-map
+        *ngIf="activeRide"
+        [pickupLat]="activeRide.pickupLat"
+        [pickupLng]="activeRide.pickupLng"
+        [dropLat]="activeRide.dropLat"
+        [dropLng]="activeRide.dropLng"
+        [driverPosition]="driverLocation"
+        [rideStatus]="activeRide.status"
+        [fare]="activeRide.fare"
+        [etaMinutes]="activeRide.etaMinutes ?? null"
+        [distanceKm]="activeRide.distanceKm">
+      </app-ride-map>
+
+      <div *ngIf="!activeRide" class="map-placeholder">
+        {{ isOnline
+          ? 'Trip requests stay live here while you wait for the next booking.'
+          : 'Go online to start receiving trips and open live navigation.' }}
+      </div>
+    </section>
+  </div>
+</div>

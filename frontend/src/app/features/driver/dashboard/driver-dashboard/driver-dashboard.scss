@@ -1,0 +1,373 @@
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 24%),
+    linear-gradient(180deg, #0f172a 0%, #111827 32%, #e5e7eb 32%, #eef2f7 100%);
+  color: #0f172a;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo-wrap,
+.profile-bar,
+.driver-id,
+.status-card,
+.stats-row,
+.tabs,
+.section-title,
+.trip-meta,
+.ride-card-top {
+  display: flex;
+}
+
+.logo-wrap,
+.profile-bar {
+  align-items: center;
+}
+
+.logo-wrap {
+  gap: 14px;
+}
+
+.logo-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #22c55e, #38bdf8);
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.logo-wrap strong {
+  display: block;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: 1.25rem;
+}
+
+.logo-wrap p,
+.driver-id small {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.profile-bar {
+  gap: 14px;
+}
+
+.presence {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.presence.online {
+  background: rgba(34, 197, 94, 0.18);
+}
+
+.driver-id {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.logout-btn {
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 20px;
+  padding: 20px;
+  flex: 1;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-card,
+.card,
+.stat-card {
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.hero-card,
+.card {
+  padding: 22px;
+}
+
+.eyebrow,
+.mini-label,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eyebrow,
+.mini-label {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.status-pill {
+  background: #e2e8f0;
+}
+
+.hero-card h1,
+.status-card h3,
+.section-title h3 {
+  margin: 10px 0 0;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.hero-card h1 {
+  font-size: 2.2rem;
+  line-height: 1.02;
+}
+
+.hero-card p,
+.status-card p {
+  line-height: 1.7;
+  color: #64748b;
+}
+
+.status-card {
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.toggle-btn,
+.primary {
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.toggle-btn {
+  min-width: 140px;
+  padding: 14px 18px;
+  background: #111827;
+  color: #fff;
+}
+
+.toggle-btn.online {
+  background: #16a34a;
+}
+
+.stats-row {
+  gap: 12px;
+}
+
+.stat-card {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+}
+
+.stat-card strong {
+  font-size: 1.6rem;
+}
+
+.stat-card span,
+.history-item p,
+.trip-meta span,
+.empty,
+.status-card p {
+  color: #64748b;
+}
+
+.tabs {
+  gap: 8px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 13px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #475569;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.tabs button.active {
+  background: #111827;
+  color: #fff;
+}
+
+.section-title,
+.ride-card-top {
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.route.small {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.pickup {
+  background: #22c55e;
+}
+
+.drop {
+  background: #111827;
+}
+
+.trip-meta {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.trip-meta span {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #eef2f7;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.primary {
+  width: 100%;
+  padding: 14px;
+  background: #111827;
+  color: #fff;
+}
+
+.ride-card {
+  display: grid;
+  gap: 12px;
+}
+
+.history {
+  display: grid;
+  gap: 14px;
+}
+
+.history-item {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.error-box {
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #fff1f2;
+  color: #be123c;
+  font-weight: 700;
+}
+
+.empty {
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+  text-align: center;
+}
+
+.map {
+  position: relative;
+  border-radius: 32px;
+  overflow: hidden;
+  min-height: 72vh;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.map app-ride-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.map-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #64748b;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 1100px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .map {
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .status-card,
+  .profile-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .driver-id {
+    align-items: flex-start;
+  }
+
+  .main {
+    padding: 14px;
+  }
+}

@@ -1,0 +1,300 @@
+<div class="dashboard">
+  <header class="topbar">
+    <a class="logo" routerLink="/">RideX</a>
+
+    <div class="topbar-center">
+      <span class="location-pill" *ngIf="currentLocationLabel">
+        Pickup near {{ currentLocationLabel }}
+      </span>
+    </div>
+
+    <div class="profile-shell">
+      <button type="button" class="profile-trigger" (click)="openProfileMenu()">
+        <span class="avatar">{{ user?.name?.charAt(0) || 'R' }}</span>
+        <span class="profile-copy">
+          <strong>{{ user?.name }}</strong>
+          <small>Rider account</small>
+        </span>
+      </button>
+
+      <div class="profile-dropdown" *ngIf="profileMenuOpen">
+        <div class="profile-card">
+          <span class="mini-label">Profile</span>
+          <strong>{{ user?.name }}</strong>
+          <span>{{ user?.email }}</span>
+        </div>
+
+        <button type="button" class="menu-item" (click)="view = 'book'; profileMenuOpen = false">
+          <span>Profile</span>
+          <small>Booking overview</small>
+        </button>
+
+        <button type="button" class="menu-item" (click)="showRides()">
+          <span>Rides</span>
+          <small>{{ rideHistory.length }} past trips</small>
+        </button>
+
+        <button type="button" class="menu-item signout" (click)="logout()">
+          <span>Sign out</span>
+          <small>End this session</small>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="panel">
+      <section class="hero-card">
+        <span class="eyebrow">Rider workspace</span>
+        <h1>Book, track, pay, and review from one focused dashboard.</h1>
+        <p>
+          Your wallet, route search, ride progress, and trip history now live in one cleaner flow.
+        </p>
+      </section>
+
+      <section class="profile-summary card">
+        <div>
+          <span class="mini-label">Profile</span>
+          <h3>{{ user?.name }}</h3>
+          <p>{{ user?.email }}</p>
+        </div>
+
+        <div class="stats-grid">
+          <div>
+            <strong>{{ completedRidesCount }}</strong>
+            <span>Completed</span>
+          </div>
+          <div>
+            <strong>{{ cancelledRidesCount }}</strong>
+            <span>Cancelled</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="wallet-bar">
+        <div class="wallet-info">
+          <span class="wallet-icon">INR</span>
+          <div>
+            <div class="wallet-label">Wallet balance</div>
+            <div class="wallet-amount">INR {{ walletBalance | number:'1.0-0' }}</div>
+          </div>
+        </div>
+        <button class="btn-topup" (click)="topUpWallet()">Add INR 200</button>
+      </div>
+
+      <div class="tabs">
+        <button [class.active]="view === 'book'" (click)="view = 'book'">Book</button>
+        <button [class.active]="view === 'history'" (click)="view = 'history'">History</button>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="view === 'book'">
+        <div *ngIf="activeRide as ride" class="active-ride card">
+          <div class="section-title">
+            <div>
+              <span class="mini-label">Active ride</span>
+              <h3>{{ statusLabel(ride.status) }}</h3>
+            </div>
+            <span class="status-chip">{{ ride.status }}</span>
+          </div>
+
+          <div class="route">
+            <div class="dot pickup"></div>
+            <p>{{ ride.pickupAddress }}</p>
+          </div>
+
+          <div class="route">
+            <div class="dot drop"></div>
+            <p>{{ ride.dropAddress }}</p>
+          </div>
+
+          <div class="ride-meta">
+            <span *ngIf="ride.driverName">Driver {{ ride.driverName }}</span>
+            <span *ngIf="ride.etaMinutes">ETA {{ ride.etaMinutes }} min</span>
+            <span *ngIf="ride.distanceKm">{{ ride.distanceKm | number:'1.0-1' }} km</span>
+            <span *ngIf="ride.fare">INR {{ ride.fare | number:'1.0-0' }}</span>
+          </div>
+
+          <div *ngIf="driverPosition" class="status-note">
+            Driver location is updating live on the map.
+          </div>
+
+          <div class="actions">
+            <button class="secondary" (click)="refreshRide()">Refresh</button>
+            <button class="danger" (click)="cancelRide()">Cancel</button>
+          </div>
+        </div>
+
+        <form *ngIf="!activeRide"
+              [formGroup]="bookingForm"
+              (ngSubmit)="bookRide()"
+              class="card form">
+
+          <div class="form-header">
+            <div>
+              <span class="eyebrow light">Your route</span>
+              <h3>Where to next?</h3>
+            </div>
+            <button
+              type="button"
+              class="ghost-button"
+              (click)="useCurrentLocation()"
+              [disabled]="isResolvingLocation">
+              {{ isResolvingLocation ? 'Locating...' : 'Use current' }}
+            </button>
+          </div>
+
+          <div class="field-group">
+            <label for="dashboardPickup">Pickup</label>
+            <div class="input-shell">
+              <span class="input-icon pickup"></span>
+              <input
+                id="dashboardPickup"
+                type="text"
+                placeholder="Pickup location"
+                formControlName="pickupAddress"
+                autocomplete="off"
+                (focus)="onAddressFocus('pickup')"
+                (blur)="onAddressBlur('pickup')"
+                (input)="onAddressInput('pickup')" />
+            </div>
+
+            <div class="suggestions" *ngIf="pickupSuggestions.length && activeSuggestionTarget === 'pickup'">
+              <button
+                type="button"
+                class="suggestion-item"
+                *ngFor="let suggestion of pickupSuggestions"
+                (mousedown)="selectSuggestion('pickup', suggestion)">
+                <span class="suggestion-copy">
+                  <strong>{{ suggestion.title }}</strong>
+                  <small>{{ suggestion.subtitle }}</small>
+                </span>
+                <span class="suggestion-tag">{{ suggestion.type | titlecase }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="dashboardDrop">Destination</label>
+            <div class="input-shell">
+              <span class="input-icon drop"></span>
+              <input
+                id="dashboardDrop"
+                type="text"
+                placeholder="Search destination"
+                formControlName="dropAddress"
+                autocomplete="off"
+                (focus)="onAddressFocus('drop')"
+                (blur)="onAddressBlur('drop')"
+                (input)="onAddressInput('drop')" />
+            </div>
+
+            <div class="suggestions" *ngIf="dropSuggestions.length && activeSuggestionTarget === 'drop'">
+              <button
+                type="button"
+                class="suggestion-item"
+                *ngFor="let suggestion of dropSuggestions"
+                (mousedown)="selectSuggestion('drop', suggestion)">
+                <span class="suggestion-copy">
+                  <strong>{{ suggestion.title }}</strong>
+                  <small>{{ suggestion.subtitle }}</small>
+                </span>
+                <span class="suggestion-tag">{{ suggestion.type | titlecase }}</span>
+              </button>
+            </div>
+          </div>
+
+          <p class="helper-text">
+            Select confirmed places from the suggestion list to lock routing and driver preview.
+          </p>
+
+          <div class="vehicles">
+            <button
+              type="button"
+              *ngFor="let v of vehicles"
+              class="vehicle"
+              [class.active]="bookingForm.value.vehicleType === v.type"
+              (click)="selectVehicle(v.type)">
+              <span class="icon">{{ v.icon }}</span>
+              <span class="vehicle-copy">
+                <strong>{{ v.label }}</strong>
+                <small>{{ v.desc }}</small>
+              </span>
+            </button>
+          </div>
+
+          <button class="primary" [disabled]="isBooking">
+            <span *ngIf="!isBooking">Confirm ride</span>
+            <span *ngIf="isBooking" class="loader"></span>
+          </button>
+        </form>
+      </div>
+
+      <div *ngIf="view === 'history'" class="history card">
+        <div class="section-title">
+          <div>
+            <span class="mini-label">Rides</span>
+            <h3>Your trip history</h3>
+          </div>
+        </div>
+
+        <div *ngIf="isLoadingHistory" class="empty-state">Loading your rides...</div>
+
+        <div *ngIf="!isLoadingHistory && !rideHistory.length" class="empty-state">
+          No completed or cancelled rides yet.
+        </div>
+
+        <div *ngFor="let ride of rideHistory" class="ride-card">
+          <div class="ride-card-top">
+            <strong>{{ ride.pickupAddress }}</strong>
+            <span class="status-chip">{{ ride.status }}</span>
+          </div>
+          <p>{{ ride.dropAddress }}</p>
+          <div class="ride-card-meta">
+            <span *ngIf="ride.completedAt">{{ ride.completedAt | date:'mediumDate' }}</span>
+            <span *ngIf="ride.fare">INR {{ ride.fare | number:'1.0-0' }}</span>
+            <span>{{ ride.vehicleType }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="map">
+      <app-ride-map
+        *ngIf="activeRide"
+        [pickupLat]="activeRide.pickupLat"
+        [pickupLng]="activeRide.pickupLng"
+        [dropLat]="activeRide.dropLat"
+        [dropLng]="activeRide.dropLng"
+        [driverPosition]="driverPosition"
+        [rideStatus]="activeRide.status"
+        [fare]="activeRide.fare"
+        [etaMinutes]="activeRide.etaMinutes ?? null"
+        [distanceKm]="activeRide.distanceKm">
+      </app-ride-map>
+
+      <app-ride-map
+        *ngIf="canShowPreviewMap"
+        [pickupLat]="bookingForm.value.pickupLat"
+        [pickupLng]="bookingForm.value.pickupLng"
+        [dropLat]="bookingForm.value.dropLat"
+        [dropLng]="bookingForm.value.dropLng"
+        [nearbyDrivers]="previewNearbyDrivers"
+        [rideStatus]="'PREVIEW'">
+      </app-ride-map>
+
+      <div *ngIf="!activeRide && !canShowPreviewMap" class="map-placeholder">
+        Search pickup and destination to preview your route and nearby drivers.
+      </div>
+    </section>
+  </div>
+
+  <app-post-ride-modal
+    *ngIf="showPostRideModal && completedRide"
+    [ride]="completedRide"
+    (closed)="onRatingModalClosed()">
+  </app-post-ride-modal>
+</div>

@@ -1,0 +1,195 @@
+<div class="home-shell">
+  <header class="site-header">
+    <a class="brand" routerLink="/">RideX</a>
+
+    <nav class="site-nav">
+      <a href="#ride">Ride</a>
+      <a href="#cities">Cities</a>
+      <a href="#footer">About</a>
+    </nav>
+
+    <div class="header-actions">
+      <ng-container *ngIf="user; else guestActions">
+        <a
+          class="profile-card"
+          [routerLink]="user.role === 'RIDER' ? '/rider/dashboard' : '/driver/dashboard'">
+          <span class="profile-avatar">{{ profileInitial() }}</span>
+          <span>
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.role === 'RIDER' ? 'Rider profile' : 'Driver profile' }}</small>
+          </span>
+        </a>
+      </ng-container>
+
+      <ng-template #guestActions>
+        <a class="text-link" routerLink="/auth/login">Log in</a>
+        <a class="dark-button" routerLink="/auth/register">Sign up</a>
+      </ng-template>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Ride smarter across your city</div>
+        <h1>Request a ride, lock pickup from your live location, and move in minutes.</h1>
+        <p>
+          A faster entry flow for RideX with a clear header, live pickup detection, curated city
+          suggestions, and a booking card that behaves more like a real ride app.
+        </p>
+
+        <div class="hero-banner">
+          <span class="banner-chip" [class.error]="currentLocationState === 'error'">
+            {{ currentLocationMessage }}
+          </span>
+          <button type="button" class="light-button" (click)="useCurrentLocation()">
+            Use current location
+          </button>
+        </div>
+
+        <div class="city-pills" id="cities">
+          <button
+            type="button"
+            class="city-pill"
+            *ngFor="let city of featuredLocations | slice:0:6"
+            (click)="selectSuggestion('pickup', city)">
+            {{ city.title }}
+          </button>
+        </div>
+      </div>
+
+      <div class="ride-panel" id="ride">
+        <div class="ride-panel-header">
+          <div>
+            <span class="section-label">Plan your ride</span>
+            <h2>Where to?</h2>
+          </div>
+          <div class="ride-badge">Live pickup</div>
+        </div>
+
+        <form [formGroup]="bookingForm" (ngSubmit)="continueToBooking()" class="ride-form">
+          <div class="field-stack">
+            <label for="pickupAddress">Pickup</label>
+            <div class="input-shell">
+              <span class="input-icon pickup"></span>
+              <input
+                id="pickupAddress"
+                type="text"
+                formControlName="pickupAddress"
+                placeholder="Enter pickup"
+                autocomplete="off"
+                (focus)="onAddressFocus('pickup')"
+                (blur)="onAddressBlur('pickup')"
+                (input)="onAddressInput('pickup')" />
+            </div>
+
+            <div class="suggestions" *ngIf="pickupSuggestions.length && activeSuggestionTarget === 'pickup'">
+              <button
+                type="button"
+                class="suggestion-item"
+                *ngFor="let suggestion of pickupSuggestions"
+                (mousedown)="selectSuggestion('pickup', suggestion)">
+                <span class="suggestion-copy">
+                  <strong>{{ suggestion.title }}</strong>
+                  <small>{{ suggestion.subtitle }}</small>
+                </span>
+                <span class="suggestion-tag">{{ suggestion.type | titlecase }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field-stack">
+            <label for="dropAddress">Destination</label>
+            <div class="input-shell">
+              <span class="input-icon drop"></span>
+              <input
+                id="dropAddress"
+                type="text"
+                formControlName="dropAddress"
+                placeholder="Search destination"
+                autocomplete="off"
+                (focus)="onAddressFocus('drop')"
+                (blur)="onAddressBlur('drop')"
+                (input)="onAddressInput('drop')" />
+            </div>
+
+            <div class="suggestions" *ngIf="dropSuggestions.length && activeSuggestionTarget === 'drop'">
+              <button
+                type="button"
+                class="suggestion-item"
+                *ngFor="let suggestion of dropSuggestions"
+                (mousedown)="selectSuggestion('drop', suggestion)">
+                <span class="suggestion-copy">
+                  <strong>{{ suggestion.title }}</strong>
+                  <small>{{ suggestion.subtitle }}</small>
+                </span>
+                <span class="suggestion-tag">{{ suggestion.type | titlecase }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="vehicle-grid">
+            <button
+              type="button"
+              *ngFor="let vehicle of vehicles"
+              class="vehicle-card"
+              [class.active]="bookingForm.value.vehicleType === vehicle.type"
+              (click)="selectVehicle(vehicle.type)">
+              <strong>{{ vehicle.label }}</strong>
+              <span>{{ vehicle.desc }}</span>
+              <small>{{ vehicle.eta }}</small>
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage" class="form-error">{{ errorMessage }}</div>
+
+          <button type="submit" class="cta-button">{{ primaryActionLabel }}</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="metrics">
+      <article>
+        <strong>10+</strong>
+        <span>curated pickup hubs across major cities</span>
+      </article>
+      <article>
+        <strong>Live</strong>
+        <span>location detection ready on first open</span>
+      </article>
+      <article>
+        <strong>1 draft</strong>
+        <span>shared from homepage into rider booking</span>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="footer">
+    <div>
+      <h3>RideX</h3>
+      <p>Reliable city rides with faster entry, smarter pickup defaults, and a cleaner booking flow.</p>
+    </div>
+
+    <div>
+      <h4>Company</h4>
+      <a routerLink="/">Home</a>
+      <a routerLink="/auth/register">Ride with us</a>
+      <a routerLink="/auth/login">Account</a>
+    </div>
+
+    <div>
+      <h4>Top cities</h4>
+      <span>Bengaluru</span>
+      <span>Hyderabad</span>
+      <span>Mumbai</span>
+      <span>Delhi</span>
+    </div>
+
+    <div>
+      <h4>Support</h4>
+      <span>Safety center</span>
+      <span>Airport pickups</span>
+      <span>Business travel</span>
+    </div>
+  </footer>
+</div>

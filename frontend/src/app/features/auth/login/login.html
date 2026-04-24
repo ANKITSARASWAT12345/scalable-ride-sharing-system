@@ -1,0 +1,78 @@
+<div class="auth-shell">
+  <section class="auth-showcase">
+    <div class="brand-lockup">
+      <span class="brand-badge">RideX</span>
+      <h1>Move through the city with a cleaner rider and driver experience.</h1>
+      <p>Book in seconds, track rides live, and keep your trip workspace feeling premium from login onward.</p>
+    </div>
+
+    <div class="showcase-cards">
+      <article class="showcase-card primary">
+        <strong>Live dispatch</strong>
+        <p>Pickup, ETA, wallet, and trip status all stay in one focused flow.</p>
+      </article>
+
+      <article class="showcase-card">
+        <strong>Driver online state</strong>
+        <p>Your availability stays remembered until you choose to go offline.</p>
+      </article>
+
+      <article class="showcase-card">
+        <strong>In-app alerts</strong>
+        <p>Riders and drivers get clear ride and wallet notifications without refreshing.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="auth-panel">
+    <div class="login-card">
+      <div class="panel-header">
+        <span class="eyebrow">Welcome back</span>
+        <h2>Sign in to RideX</h2>
+        <p>Use your rider or driver account to continue.</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input
+            id="loginEmail"
+            type="email"
+            formControlName="email"
+            placeholder="name@example.com" />
+          <small *ngIf="email.touched && email.invalid">
+            Valid email is required
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input
+            id="loginPassword"
+            type="password"
+            formControlName="password"
+            placeholder="Enter your password" />
+          <small *ngIf="password.touched && password.invalid">
+            Minimum 8 characters required
+          </small>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="isLoading"
+          class="login-btn">
+          <span *ngIf="!isLoading">Sign in</span>
+          <span *ngIf="isLoading" class="loader"></span>
+        </button>
+      </form>
+
+      <div class="footer">
+        <p>New here? <a routerLink="/auth/register">Create an account</a></p>
+      </div>
+    </div>
+  </section>
+</div>

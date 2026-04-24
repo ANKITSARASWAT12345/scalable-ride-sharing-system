@@ -1,0 +1,16 @@
+<div class="toast-stack" *ngIf="notifications.notifications$ | async as items">
+  <article
+    *ngFor="let item of items; trackBy: trackById"
+    class="toast"
+    [class.success]="item.tone === 'success'"
+    [class.info]="item.tone === 'info'"
+    [class.warning]="item.tone === 'warning'"
+    [class.error]="item.tone === 'error'">
+    <div class="toast-copy">
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.message }}</p>
+    </div>
+
+    <button type="button" class="dismiss" (click)="notifications.dismiss(item.id)">Dismiss</button>
+  </article>
+</div>

@@ -1,0 +1,231 @@
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 214, 143, 0.18), transparent 26%),
+    radial-gradient(circle at 85% 20%, rgba(255, 184, 0, 0.18), transparent 24%),
+    linear-gradient(135deg, #091016 0%, #101820 48%, #f3efe5 48%, #f7f3eb 100%);
+}
+
+.auth-showcase {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px;
+  color: #f8fafc;
+}
+
+.brand-lockup {
+  max-width: 560px;
+}
+
+.brand-badge,
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-lockup h1 {
+  margin: 20px 0 16px;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: clamp(2.8rem, 4vw, 4.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.brand-lockup p {
+  margin: 0;
+  max-width: 460px;
+  color: rgba(248, 250, 252, 0.72);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.showcase-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.showcase-card {
+  padding: 20px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.showcase-card.primary {
+  background: linear-gradient(135deg, rgba(0, 214, 143, 0.16), rgba(255, 184, 0, 0.08));
+}
+
+.showcase-card strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.showcase-card p {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.74);
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.login-card {
+  width: min(460px, 100%);
+  padding: 36px;
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(24px);
+}
+
+.panel-header h2 {
+  margin: 14px 0 10px;
+  color: #0f172a;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: 2.2rem;
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.panel-header p {
+  margin: 0 0 24px;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.form-group {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 18px;
+  border: 1px solid #d9dee6;
+  background: #f8fafc;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #111827;
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.form-group small {
+  color: #dc2626;
+  font-size: 0.78rem;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 15px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.login-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.32);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+.error-box {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #fff1f2;
+  color: #b42318;
+  font-weight: 600;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.footer a {
+  color: #0f172a;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1100px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+    background:
+      radial-gradient(circle at 12% 10%, rgba(0, 214, 143, 0.16), transparent 26%),
+      linear-gradient(180deg, #091016 0%, #101820 44%, #f7f3eb 44%, #f7f3eb 100%);
+  }
+
+  .showcase-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-showcase,
+  .auth-panel {
+    padding: 22px;
+  }
+
+  .login-card {
+    padding: 24px;
+    border-radius: 28px;
+  }
+
+  .brand-lockup h1 {
+    font-size: 2.5rem;
+  }
+}

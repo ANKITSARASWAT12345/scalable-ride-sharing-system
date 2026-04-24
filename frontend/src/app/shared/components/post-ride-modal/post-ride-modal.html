@@ -1,0 +1,91 @@
+<div class="overlay" (click)="onClose()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="icon">🎉</div>
+      <h2>Ride Completed</h2>
+      <p class="fare">₹{{ ride.fare | number:'1.0-0' }}</p>
+      <p class="meta">
+        {{ ride.distanceKm }} km · {{ ride.vehicleType }}
+        <span *ngIf="ride.surgeMultiplier && ride.surgeMultiplier !== 1">
+          · {{ ride.surgeMultiplier }}× surge
+        </span>
+      </p>
+    </div>
+
+    <!-- ROUTE -->
+    <div class="route">
+      <div class="point pickup"></div>
+      <span>{{ ride.pickupAddress }}</span>
+
+      <div class="arrow">→</div>
+
+      <div class="point drop"></div>
+      <span>{{ ride.dropAddress }}</span>
+    </div>
+
+    <!-- RECEIPT -->
+    <div class="receipt">
+      📧 Receipt sent to your email
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RATING -->
+    <div *ngIf="!rated">
+
+      <p class="rate-text">
+        How was {{ ride.driverName }}?
+      </p>
+
+      <!-- STARS -->
+      <div class="stars">
+        <span
+          *ngFor="let star of [1,2,3,4,5]"
+          (click)="selectStar(star)"
+          (mouseenter)="hoverStar(star)"
+          (mouseleave)="hoverStar(0)"
+        >
+          {{ star <= (hoveredStar || selectedStars) ? '★' : '☆' }}
+        </span>
+      </div>
+
+      <!-- TAGS -->
+      <div class="tags">
+        <button
+          *ngFor="let tag of quickTags"
+          [class.active]="selectedTags.includes(tag)"
+          (click)="toggleTag(tag)"
+        >
+          {{ tag }}
+        </button>
+      </div>
+
+      <!-- SUBMIT -->
+      <button
+        class="submit-btn"
+        [disabled]="selectedStars === 0 || isSubmitting"
+        (click)="submitRating()"
+      >
+        {{ isSubmitting ? 'Submitting...' : 'Submit Rating' }}
+      </button>
+
+      <div *ngIf="submitError" class="submit-error">
+        {{ submitError }}
+      </div>
+
+    </div>
+
+    <!-- AFTER SUBMIT -->
+    <div *ngIf="rated" class="success-msg">
+      ✅ Thanks for your feedback!
+    </div>
+
+    <!-- CLOSE -->
+    <button class="close-btn" (click)="onClose()">
+      Done
+    </button>
+
+  </div>
+</div>
