@@ -2,6 +2,7 @@ package com.rideapp.backend.service;
 
 
 import com.rideapp.backend.dto.request.UpdateLocationRequest;
+import com.rideapp.backend.dto.response.DriverAvailabilityResponse;
 import com.rideapp.backend.model.DriverLocation;
 import com.rideapp.backend.model.User;
 import com.rideapp.backend.repository.DriverLocationRepository;
@@ -34,5 +35,21 @@ public class DriverLocationService {
         location.setAvailable(request.getIsAvailable());
 
         driverLocationRepository.save(location);
+    }
+
+    public DriverAvailabilityResponse getAvailability(String driverEmail) {
+        User driver = userRepository.findByEmail(driverEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Driver not found"));
+
+        return driverLocationRepository.findByDriver(driver)
+                .map(location -> DriverAvailabilityResponse.builder()
+                        .online(location.isAvailable())
+                        .latitude(location.getLatitude())
+                        .longitude(location.getLongitude())
+                        .updatedAt(location.getUpdatedAt())
+                        .build())
+                .orElseGet(() -> DriverAvailabilityResponse.builder()
+                        .online(false)
+                        .build());
     }
 }

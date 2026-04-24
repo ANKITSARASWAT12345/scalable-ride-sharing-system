@@ -18,10 +18,10 @@ public interface DriverLocationRepository extends JpaRepository<DriverLocation, 
 
     @Query(value = """
         SELECT dl.* FROM driver_locations dl
-        JOIN driver_profiles dp ON dp.user_id = dl.driver_id
+        LEFT JOIN driver_profiles dp ON dp.user_id = dl.driver_id
         WHERE dl.is_available = true
-          AND dp.vehicle_type = :vehicleType
-          AND dp.is_verified = true
+          AND (dp.vehicle_type IS NULL OR dp.vehicle_type = :vehicleType)
+          AND (dp.is_verified IS NULL OR dp.is_verified = true)
           AND (
             6371 * acos(
               cos(radians(:lat)) * cos(radians(dl.latitude))

@@ -23,6 +23,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final WalletService walletService;
 
     public AuthResponse register(RegisterRequest request) {
         // check for duplicate email
@@ -41,9 +42,11 @@ public class AuthService {
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))  // HASH the password
                 .role(request.getRole())
+                .isActive(true)
                 .build();
 
         userRepository.save(user);  // INSERT into users table
+        walletService.createWallet(user);
 
         // generate tokens
         var accessToken = jwtService.generateToken(user);

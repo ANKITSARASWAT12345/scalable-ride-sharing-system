@@ -43,7 +43,7 @@ public class WalletService {
     public Wallet topUp(User user, BigDecimal amount, String gatewayPaymentId) {
         // Use pessimistic lock — prevents race conditions
         Wallet wallet = walletRepository.findByUserWithLock(user)
-                .orElseThrow(() -> new IllegalStateException("Wallet not found"));
+                .orElseGet(() -> createWallet(user));
 
         wallet.setBalance(wallet.getBalance().add(amount));
         Wallet saved = walletRepository.save(wallet);
@@ -77,7 +77,7 @@ public class WalletService {
 
         // Step 1: Debit rider wallet (with lock to prevent race conditions)
         Wallet riderWallet = walletRepository.findByUserWithLock(rider)
-                .orElseThrow(() -> new IllegalStateException("Rider wallet not found"));
+                .orElseGet(() -> createWallet(rider));
 
         if (riderWallet.getBalance().compareTo(fare) < 0) {
             throw new InsufficientBalanceException(
@@ -102,7 +102,7 @@ public class WalletService {
 
         // Step 2: Credit driver wallet
         Wallet driverWallet = walletRepository.findByUserWithLock(driver)
-                .orElseThrow(() -> new IllegalStateException("Driver wallet not found"));
+                .orElseGet(() -> createWallet(driver));
 
         driverWallet.setBalance(driverWallet.getBalance().add(driverEarning));
         driverWallet.setTotalEarned(driverWallet.getTotalEarned().add(driverEarning));
@@ -132,7 +132,7 @@ public class WalletService {
         // Only refund if a payment was already made
         BigDecimal fare = ride.getFare();
         Wallet riderWallet = walletRepository.findByUserWithLock(rider)
-                .orElseThrow(() -> new IllegalStateException("Rider wallet not found"));
+                .orElseGet(() -> createWallet(rider));
 
         riderWallet.setBalance(riderWallet.getBalance().add(fare));
         riderWallet.setTotalSpent(riderWallet.getTotalSpent().subtract(fare));
@@ -153,7 +153,7 @@ public class WalletService {
 
     public Wallet getWallet(User user) {
         return walletRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("Wallet not found"));
+                .orElseGet(() -> createWallet(user));
     }
 
 }

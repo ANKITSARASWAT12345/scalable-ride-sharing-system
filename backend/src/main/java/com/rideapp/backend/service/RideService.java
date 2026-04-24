@@ -2,6 +2,7 @@ package com.rideapp.backend.service;
 
 
 import com.rideapp.backend.dto.request.BookRideRequest;
+import com.rideapp.backend.dto.response.NearbyDriverResponse;
 import com.rideapp.backend.dto.response.RideResponse;
 import com.rideapp.backend.exception.RideNotFoundException;
 import com.rideapp.backend.exception.UnauthorizedActionException;
@@ -9,6 +10,7 @@ import com.rideapp.backend.model.DriverLocation;
 import com.rideapp.backend.model.Ride;
 import com.rideapp.backend.model.RideStatus;
 import com.rideapp.backend.model.User;
+import com.rideapp.backend.model.VehicleType;
 import com.rideapp.backend.repository.DriverLocationRepository;
 import com.rideapp.backend.repository.RideRepository;
 import com.rideapp.backend.repository.UserRepository;
@@ -262,6 +264,13 @@ public class RideService {
                 .stream().map(this::toResponse).toList();
     }
 
+    public List<NearbyDriverResponse> getNearbyDrivers(Double lat, Double lng, VehicleType vehicleType) {
+        return driverLocationRepository.findNearbyAvailableDrivers(lat, lng, 5.0, vehicleType.name())
+                .stream()
+                .map(driverLocation -> toNearbyDriverResponse(driverLocation, lat, lng, vehicleType))
+                .toList();
+    }
+
 
 
     @Transactional
@@ -416,6 +425,49 @@ public class RideService {
                 .requestedAt(ride.getRequestedAt())
                 .acceptedAt(ride.getAcceptedAt())
                 .completedAt(ride.getCompletedAt())
+                .surgeMultiplier(ride.getSurgeMultiplier())
+                .etaMinutes(ride.getEtaMinutes())
+                .build();
+    }
+
+    private NearbyDriverResponse toNearbyDriverResponse(
+            DriverLocation driverLocation,
+            Double pickupLat,
+            Double pickupLng,
+            VehicleType vehicleType) {
+        User driver = driverLocation.getDriver();
+        BigDecimal distanceKm = fareCalculatorService.calculateDistance(
+                pickupLat,
+                pickupLng,
+                driverLocation.getLatitude(),
+                driverLocation.getLongitude()
+        );
+
+        Integer etaMinutes = etaService.calculateEtaMinutes(
+                driverLocation.getLatitude(),
+                driverLocation.getLongitude(),
+                pickupLat,
+                pickupLng,
+                vehicleType
+        );
+
+        return NearbyDriverResponse.builder()
+                .driverId(driver.getId())
+                .driverName(driver.getName())
+                .latitude(driverLocation.getLatitude())
+                .longitude(driverLocation.getLongitude())
+                .vehicleType(
+                        driver.getDriverProfile() != null
+                                ? driver.getDriverProfile().getVehicleType()
+                                : vehicleType
+                )
+                .rating(
+                        driver.getDriverProfile() != null
+                                ? driver.getDriverProfile().getRating()
+                                : BigDecimal.ZERO
+                )
+                .distanceKm(distanceKm)
+                .etaMinutes(etaMinutes)
                 .build();
     }
 

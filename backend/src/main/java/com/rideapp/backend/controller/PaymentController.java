@@ -2,6 +2,7 @@ package com.rideapp.backend.controller;
 
 
 import com.rideapp.backend.dto.request.CreatePaymentOrderRequest;
+import com.rideapp.backend.dto.request.WalletTopUpRequest;
 import com.rideapp.backend.dto.response.PaymentOrderResponse;
 import com.rideapp.backend.dto.response.WalletResponse;
 import com.rideapp.backend.model.User;
@@ -50,6 +51,21 @@ public class PaymentController {
                 userDetails.getUsername()
         );
         return ResponseEntity.ok(Map.of("message", "Payment verified successfully"));
+    }
+
+    @PostMapping("/wallet/top-up")
+    public ResponseEntity<WalletResponse> topUpWallet(
+            @Valid @RequestBody WalletTopUpRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Wallet wallet = paymentService.topUpWallet(user, request.getAmount());
+        return ResponseEntity.ok(WalletResponse.builder()
+                .userId(user.getId().toString())
+                .balance(wallet.getBalance())
+                .totalEarned(wallet.getTotalEarned())
+                .totalSpent(wallet.getTotalSpent())
+                .build()
+        );
     }
 
 

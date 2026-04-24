@@ -45,6 +45,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll()
                                 // /api/auth/register and /api/auth/login are PUBLIC — no token needed
 
+                                .requestMatchers("/api/locations/**").permitAll()
+                                // public landing page uses these curated city/address suggestions
+
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 // only ADMIN role can access admin endpoints
 

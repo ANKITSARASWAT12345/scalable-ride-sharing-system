@@ -2,7 +2,9 @@ package com.rideapp.backend.controller;
 
 
 import com.rideapp.backend.dto.request.BookRideRequest;
+import com.rideapp.backend.dto.response.NearbyDriverResponse;
 import com.rideapp.backend.dto.response.RideResponse;
+import com.rideapp.backend.model.VehicleType;
 import com.rideapp.backend.model.RideStatus;
 import com.rideapp.backend.service.RideService;
 import jakarta.validation.Valid;
@@ -39,6 +41,15 @@ public class RideController {
     public ResponseEntity<List<RideResponse>> getMyRides(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(rideService.getRiderHistory(userDetails.getUsername()));
+    }
+
+    @GetMapping("/nearby-drivers")
+    @PreAuthorize("hasRole('RIDER')")
+    public ResponseEntity<List<NearbyDriverResponse>> getNearbyDrivers(
+            @RequestParam Double lat,
+            @RequestParam Double lng,
+            @RequestParam VehicleType vehicleType) {
+        return ResponseEntity.ok(rideService.getNearbyDrivers(lat, lng, vehicleType));
     }
 
 

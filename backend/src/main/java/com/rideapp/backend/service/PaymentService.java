@@ -158,6 +158,13 @@ public class PaymentService {
 
     // ── Process wallet payment for completed ride ─────────────────────
     @Transactional
+    public Wallet topUpWallet(User user, BigDecimal amount) {
+        Wallet wallet = walletService.topUp(user, amount, "MANUAL_TOPUP_" + System.currentTimeMillis());
+        notificationService.sendWalletTopUpEmail(user, amount);
+        return wallet;
+    }
+
+    @Transactional
     public Payment processWalletPaymentForRide(Ride ride) {
         User rider  = ride.getRider();
         User driver = ride.getDriver();
