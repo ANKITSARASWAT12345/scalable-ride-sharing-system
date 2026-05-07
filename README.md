@@ -97,7 +97,7 @@ This is not a tutorial project. Every layer — from the Haversine SQL query to 
 Rider clicks "Book Ride"
         │
         ▼
-Angular BookingComponent
+Angular BookingComponents
   └─ RideService.bookRide(request)
   └─ HttpClient POST /api/rides/book
   └─ Auth Interceptor adds: Authorization: Bearer <jwt>
